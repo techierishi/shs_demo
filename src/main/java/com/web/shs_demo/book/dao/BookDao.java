@@ -2,11 +2,16 @@ package com.web.shs_demo.book.dao;
 
 import java.util.List;
 
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.criterion.Projection;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
 
+import com.web.shs_demo.account.model.User;
 import com.web.shs_demo.book.model.Book;
 
 public class BookDao {
@@ -22,6 +27,31 @@ public class BookDao {
             Query query = session.createQuery("from Book b");
             List<Book> bookList = query.list();
             return bookList;
+        } finally {
+            session.close();
+        }
+    }
+    
+    public List<Book> getBookListByUser(User user,int firstResult) {
+        Session session = sessionFactory.openSession();
+        try {
+            Criteria query = session.createCriteria(Book.class).add(Restrictions.eq("user.id", user.getId()));
+            query.setFirstResult(firstResult);
+            query.setMaxResults(4);
+            List<Book> bookList = query.list();
+            return bookList;
+        } finally {
+            session.close();
+        }
+    }
+    
+    public long getBookListCountByUser(User user) {
+        Session session = sessionFactory.openSession();
+        try {
+            Criteria query = session.createCriteria(Book.class).setProjection(Projections.rowCount());
+           
+            Long bookCount = (Long) query.uniqueResult();
+            return bookCount;
         } finally {
             session.close();
         }

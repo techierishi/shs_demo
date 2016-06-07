@@ -11,70 +11,107 @@ import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.ActionSupport;
 
 public class BookAction extends ActionSupport {
-    private static final long serialVersionUID = 2538923417705852774L;
+	private static final long serialVersionUID = 2538923417705852774L;
 
-    private Long bookId;
-    private Book book;
-    private List<Book> bookList;
+	private Long bookId;
+	private Book book;
+	private List<Book> bookList;
+	private long pages = 0;
+	private int page = 0;
 
-    private BookService bookService;
+	private BookService bookService;
 
-    public String list() throws Exception {
-        if (bookList == null) {
-            bookList = new ArrayList<Book>();
-        }
-        bookList.addAll(getCurrentUser().getBooks());
-        return "list";
-    }
+	public String list() throws Exception {
+		if (bookList == null) {
+			bookList = new ArrayList<Book>();
+		}
 
-    public String show() throws Exception {
-        book = getCurrentUser().getBook(bookId);
-        return "show";
-    }
+		int pageSize = 4;
+		System.out.println(" pageSize : " + pageSize);
+		if (page != 0) {
+			page = page * pageSize;
+		}
+		
+		bookList.addAll(bookService.getBookListByUser(getCurrentUser(), page));
+		if (null != bookList && !bookList.isEmpty()) {
+			long count = bookService.getBookListCountByUser(getCurrentUser());
+			System.out.println(" count : " + count);
+			pages = count / pageSize;
+			System.out.println(" pages 1 : " + pages);
 
-    public String input() throws Exception {
-        if (bookId != null) {
-            book = getCurrentUser().getBook(bookId);
-        }
-        return INPUT;
-    }
+			if ((pages * pageSize) > count) {
+				pages += 1;
+			}
+			System.out.println(" pages 2 : " + pages);
 
-    public String saveOrUpdate() throws Exception {
-        book.setUser(getCurrentUser());
-        bookService.saveOrUpdateBook(book);
-        return SUCCESS;
-    }
+		}
+		return "list";
+	}
 
-    public String delete() throws Exception {
-        Book book = getCurrentUser().getBook(bookId);
-        if (book != null) {
-            bookService.deleteBook(bookId);
-            getCurrentUser().getBooks().remove(book);
-        }
-        return SUCCESS;
-    }
+	public String show() throws Exception {
+		book = getCurrentUser().getBook(bookId);
+		return "show";
+	}
 
-    public List<Book> getBookList() {
-        return bookList;
-    }
+	public String input() throws Exception {
+		if (bookId != null) {
+			book = getCurrentUser().getBook(bookId);
+		}
+		return INPUT;
+	}
 
-    public Book getBook() {
-        return book;
-    }
+	public String saveOrUpdate() throws Exception {
+		book.setUser(getCurrentUser());
+		bookService.saveOrUpdateBook(book);
+		return SUCCESS;
+	}
 
-    public void setBook(Book book) {
-        this.book = book;
-    }
+	public String delete() throws Exception {
+		Book book = getCurrentUser().getBook(bookId);
+		if (book != null) {
+			bookService.deleteBook(bookId);
+			getCurrentUser().getBooks().remove(book);
+		}
+		return SUCCESS;
+	}
 
-    public void setBookId(Long bookId) {
-        this.bookId = bookId;
-    }
+	public List<Book> getBookList() {
+		return bookList;
+	}
 
-    public void setBookService(BookService bookService) {
-        this.bookService = bookService;
-    }
+	public Book getBook() {
+		return book;
+	}
 
-    private User getCurrentUser() {
-        return (User)ActionContext.getContext().getSession().get(User.SESSION_KEY);
-    }
+	public void setBook(Book book) {
+		this.book = book;
+	}
+
+	public void setBookId(Long bookId) {
+		this.bookId = bookId;
+	}
+
+	public void setBookService(BookService bookService) {
+		this.bookService = bookService;
+	}
+
+	public long getPages() {
+		return pages;
+	}
+
+	public void setPages(int pages) {
+		this.pages = pages;
+	}
+
+	public int getPage() {
+		return page;
+	}
+
+	public void setPage(int page) {
+		this.page = page;
+	}
+
+	private User getCurrentUser() {
+		return (User) ActionContext.getContext().getSession().get(User.SESSION_KEY);
+	}
 }

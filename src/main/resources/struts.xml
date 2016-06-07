@@ -24,6 +24,10 @@
         <global-results>
             <result name="login" type="redirectAction">login!input</result>
         </global-results>
+        
+        <action name="">
+            <result type="redirect">index.jsp</result>
+        </action>
     </package>
 
     <include file="account.xml" />
